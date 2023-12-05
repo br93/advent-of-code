@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -28,37 +29,46 @@ func main() {
 	solution := Solution{}
 	solution.day5("example")
 
-	//fmt.Println(solution.almanac.seeds)
-	fmt.Printf("0: %d", solution.almanac.seeds)
 	solution.loopMap()
-	fmt.Printf("1: %d", solution.almanac.seeds)
+	solution.minimumLocation()
 
+	fmt.Println(solution.location)
 }
 
 func (s *Solution) loopMap() {
 
 	maps := s.almanac.maps
-	flag := true
+	for {
+		for _, element := range maps[0] {
+			for index, seed := range s.almanac.seeds {
+				min := element.src
+				max := element.src + element.len - 1
 
-	for index, seed := range s.almanac.seeds {
-		for _, element1 := range maps {
-			for _, element2 := range element1 {
-				dest := element2.dest
-				src := element2.src
-				len := element2.len
-
-				min := src
-				max := src + len - 1
-
-				if !(seed < min || seed > max) && flag {
-					s.almanac.seeds[index] = seed - src + dest
-					flag = false
+				if seed == s.almanac.seeds[index] && (seed >= min && seed <= max) {
+					s.almanac.seeds[index] = seed - element.src + element.dest
 				}
 			}
-			flag = true
+		}
+
+		copy(maps[0:], maps[0+1:])
+		maps[len(maps)-1] = nil
+		maps = maps[:len(maps)-1]
+
+		if len(maps) == 0 {
+			break
 		}
 	}
 
+}
+
+func (s *Solution) minimumLocation() {
+	location := math.MaxInt
+
+	for _, seed := range s.almanac.seeds {
+		location = min(location, seed)
+	}
+
+	s.location = location
 }
 
 func (a *Almanac) setSeeds(input []string) {
