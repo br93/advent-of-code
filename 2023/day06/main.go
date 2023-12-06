@@ -20,15 +20,15 @@ type Solution struct {
 	answers []int
 }
 
-const Day = 5
+const Day = 6
 
 func main() {
 	solution := Solution{}
-	solution.day5("input")
+	solution.day6("input")
 	solution.print()
 }
 
-func (s *Solution) day5(file string) {
+func (s *Solution) day6(file string) {
 	s.answers = make([]int, 0)
 
 	s.setRaceArray("input", "1")
