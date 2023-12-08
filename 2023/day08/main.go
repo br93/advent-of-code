@@ -29,8 +29,7 @@ func (s *Solution) day8(f string) {
 	s.step, s.network = s.formatInput()
 	s.answers = make([]int, 2)
 
-	s.steps()
-	s.print(f)
+	s.part1().part2().print(f)
 }
 
 func (s *Solution) print(f string) {
@@ -59,9 +58,46 @@ func (s *Solution) formatInput() (string, map[string][]string) {
 
 }
 
-func (s *Solution) steps() {
+func (s *Solution) part1() *Solution {
+	s.answers[0] = s.steps("AAA")
+	return s
+}
+
+func (s *Solution) part2() *Solution {
+
+	network := s.network
+	var positions []string
+	var counts []int
+
+	for index := range network {
+		if index[2] == 'A' {
+			positions = append(positions, index)
+		}
+	}
+
+	for _, position := range positions {
+		counts = append(counts, s.steps(position))
+	}
+
+	var answer int
+
+	if len(counts) > 1 {
+		answer = 1
+
+		for i := 0; i < len(counts); i++ {
+			answer = lcm(answer, counts[i])
+		}
+	} else {
+		answer = counts[0]
+	}
+
+	s.answers[1] = answer
+
+	return s
+}
+
+func (s *Solution) steps(pos string) int {
 	var count int
-	pos := "AAA"
 
 	step := s.step
 	network := s.network
@@ -78,7 +114,7 @@ func (s *Solution) steps() {
 		step = step[1:] + string(step[0])
 	}
 
-	s.answers[0] = count
+	return count
 }
 
 func replacer(str string) string {
@@ -108,4 +144,20 @@ func toInt(str string) int {
 	}
 
 	return num
+}
+
+func gcd(a, b int) int {
+
+	for b != 0 {
+		aux := a
+		a = b
+		b = aux % b
+	}
+
+	return a
+
+}
+
+func lcm(a, b int) int {
+	return a * b / gcd(a, b)
 }
