@@ -15,7 +15,7 @@ type Solution struct {
 	answers []int
 }
 
-const Day = 9
+const Day = 8
 
 func main() {
 	solution := &Solution{}
@@ -79,7 +79,7 @@ func (s *Solution) part2() *Solution {
 		counts = append(counts, s.steps(position))
 	}
 
-	var answer int
+	answer := counts[0]
 
 	if len(counts) > 1 {
 		answer = 1
@@ -87,8 +87,6 @@ func (s *Solution) part2() *Solution {
 		for i := 0; i < len(counts); i++ {
 			answer = lcm(answer, counts[i])
 		}
-	} else {
-		answer = counts[0]
 	}
 
 	s.answers[1] = answer
