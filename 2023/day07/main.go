@@ -35,10 +35,10 @@ func (s *Solution) day07(file string) {
 	s.answers = make([]int, 2)
 
 	s.input = s.readFile(file)
-	s.hands, s.joker = s.getHands()
+	s.hands, _ = s.getHands()
 
 	s.answers[0] = s.evaluate(s.hands)
-	s.answers[1] = s.evaluate(s.joker)
+	//s.answers[1] = s.evaluate(s.joker)
 
 }
 
@@ -55,16 +55,16 @@ func (*Solution) readFile(file string) string {
 func (s *Solution) getHands() ([]Hand, []Hand) {
 	s.hands, s.joker = s.getHandFromInput()
 	s.convertHand("part1")
-	s.convertHand("part2")
+	//s.convertHand("part2")
 
 	hands := s.hands
-	joker := s.joker
+	//joker := s.joker
 
-	hands, joker = s.setPairValues(hands)
+	hands, _ = s.setPairValues(hands)
 	hands = sortCardsByValue(hands)
-	joker = sortCardsByValue(joker)
+	//joker = sortCardsByValue(joker)
 
-	return hands, joker
+	return hands, nil
 
 }
 
@@ -146,14 +146,14 @@ func (s *Solution) getHandFromInput() ([]Hand, []Hand) {
 
 func (s *Solution) setPairValues(hands []Hand) ([]Hand, []Hand) {
 
-	joker := s.joker
+	//joker := s.joker
 
 	for index := range hands {
 		hands[index].value = pairStrenght(hands[index].cards)
-		joker[index].value = s.checkJoker(joker[index].cards, pairStrenght(joker[index].cards))
+		//joker[index].value = s.checkJoker(joker[index].cards, pairStrenght(joker[index].cards))
 	}
 
-	return hands, joker
+	return hands, nil
 
 }
 
