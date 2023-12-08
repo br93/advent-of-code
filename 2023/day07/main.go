@@ -13,6 +13,7 @@ import (
 type Solution struct {
 	input   string
 	hands   []Hand
+	joker   []Hand
 	answers []int
 }
 
@@ -34,9 +35,11 @@ func (s *Solution) day07(file string) {
 	s.answers = make([]int, 2)
 
 	s.input = s.readFile(file)
-	s.hands = s.getHands()
+	s.hands, s.joker = s.getHands()
 
-	s.answers[0] = s.evaluate()
+	s.answers[0] = s.evaluate(s.hands)
+	s.answers[1] = s.evaluate(s.joker)
+
 }
 
 func (*Solution) readFile(file string) string {
@@ -49,30 +52,43 @@ func (*Solution) readFile(file string) string {
 	return string(fileBytes)
 }
 
-func (s *Solution) getHands() []Hand {
-	s.hands = s.getHandFromInput()
-	s.convertHand()
+func (s *Solution) getHands() ([]Hand, []Hand) {
+	s.hands, s.joker = s.getHandFromInput()
+	s.convertHand("part1")
+	s.convertHand("part2")
 
 	hands := s.hands
+	joker := s.joker
 
-	hands = s.setPairValues(hands)
+	hands, joker = s.setPairValues(hands)
 	hands = sortCardsByValue(hands)
+	joker = sortCardsByValue(joker)
 
-	return hands
+	return hands, joker
 
 }
 
-func (s *Solution) convertHand() {
+func (s *Solution) convertHand(step string) {
 	for index := range s.hands {
-		s.hands[index].cards = convertCards(s.hands[index].cards)
+		if step == "part1" {
+			s.hands[index].cards = convertCards(s.hands[index].cards, step)
+		} else {
+			s.joker[index].cards = convertCards(s.joker[index].cards, step)
+		}
+
 	}
 }
 
-func convertCards(cards string) string {
+func convertCards(cards, step string) string {
 	s := strings.Split(cards, "")
 
 	for index, element := range s {
-		s[index] = strings.Map(rules, element)
+		if step == "part1" {
+			s[index] = strings.Map(rules, element)
+		} else {
+			s[index] = strings.Map(joker, element)
+		}
+
 	}
 
 	return strings.Join(s, "")
@@ -95,7 +111,16 @@ func rules(r rune) rune {
 	}
 }
 
-func (s *Solution) getHandFromInput() []Hand {
+func joker(r rune) rune {
+	switch r {
+	case 'B':
+		return '0'
+	default:
+		return r
+	}
+}
+
+func (s *Solution) getHandFromInput() ([]Hand, []Hand) {
 	input := strings.Split(s.input, "\n")
 
 	var cards string
@@ -116,16 +141,47 @@ func (s *Solution) getHandFromInput() []Hand {
 		hands = append(hands, hand)
 	}
 
-	return hands
+	return hands, hands
 }
 
-func (s *Solution) setPairValues(hands []Hand) []Hand {
+func (s *Solution) setPairValues(hands []Hand) ([]Hand, []Hand) {
+
+	joker := s.joker
 
 	for index := range hands {
 		hands[index].value = pairStrenght(hands[index].cards)
+		joker[index].value = s.checkJoker(joker[index].cards, pairStrenght(joker[index].cards))
 	}
 
-	return hands
+	return hands, joker
+
+}
+
+func (s *Solution) checkJoker(cards string, value int) int {
+
+	count := strings.Count(cards, "0")
+
+	switch count {
+	case 5:
+		return count + 1
+	case 4:
+		return count + 2
+	case 3:
+		return value + count + 2
+	case 2:
+		return value + count + 1
+	case 1:
+		{
+			if value == 5 || value == 0 {
+				return value + count
+			}
+
+			return value + 2
+		}
+	default:
+		return value
+
+	}
 
 }
 
@@ -161,7 +217,9 @@ func pairStrenght(card string) int {
 	var values []int
 
 	for _, char := range card {
-		counts[char]++
+		if char != '0' {
+			counts[char]++
+		}
 	}
 
 	for _, count := range counts {
@@ -193,10 +251,10 @@ func pairStrenght(card string) int {
 	}
 
 	return 0
+
 }
 
-func (s *Solution) evaluate() int {
-	hands := s.hands
+func (s *Solution) evaluate(hands []Hand) int {
 	var value int
 
 	for index, element := range hands {
