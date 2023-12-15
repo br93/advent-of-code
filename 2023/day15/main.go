@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -22,7 +24,7 @@ func main() {
 
 	solution := &Solution{}
 	solution.day15(EXAMPLE)
-	solution.day15(INPUT)
+	//solution.day15(INPUT)
 
 }
 
@@ -34,18 +36,47 @@ func (s *Solution) day15(file string) {
 
 func (s *Solution) solvePuzzle() []int {
 
-	solution := []int{s.calculate(), 0}
+	part1, part2 := s.calculate()
+	solution := []int{part1, part2}
 	return solution
 }
 
-func (s *Solution) calculate() int {
+func (s *Solution) calculate() (int, int) {
 	sequence := strings.Split(s.input, ",")
 	var values []int
+
+	boxes := make([][]string, 256)
+	lens := make(map[string]int, 256)
+
 	for _, element := range sequence {
 		values = append(values, s.hash(element))
+		if strings.Contains(element, "-") {
+			label := element[:len(element)-1]
+			index := s.hash(label)
+			if slices.Contains(boxes[index], label) {
+				slices.Delete(boxes[index], slices.Index(boxes[index], label), slices.Index(boxes[index], label))
+			}
+
+		} else {
+			equals := strings.Index(element, "=")
+			label := element[:equals]
+			index := s.hash(label)
+			if !slices.Contains(boxes[index], label) {
+				boxes[index] = append(boxes[index], label)
+			}
+
+			lens[label] = toInt(element[equals+1:])
+		}
 	}
 
-	return sumArray(values...)
+	power := 0
+
+	for indexBox, box := range boxes {
+		for indexLabel, label := range box {
+			power = power + (indexBox+1)*(indexLabel+1)*lens[label]
+		}
+	}
+	return sumArray(values...), power
 
 }
 
@@ -88,4 +119,14 @@ func readError(file string, err error) {
 
 		log.Fatal(err)
 	}
+}
+
+func toInt(str string) int {
+	num, err := strconv.Atoi(str)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return num
 }
