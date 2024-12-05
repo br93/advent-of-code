@@ -50,12 +50,6 @@ func (s *Solution) safeReports() int {
 		if slices.Equal(report, asc) || slices.Equal(report, desc) {
 			safe = safe + s.checkUnsafe(report)
 		}
-
-		fmt.Println(report)
-		fmt.Println(asc)
-		fmt.Println(desc)
-		fmt.Println()
-
 	}
 
 	return safe
@@ -72,8 +66,6 @@ func (s *Solution) checkUnsafe(num []int) int {
 		}
 
 	}
-
-	fmt.Println("safe")
 	return 1
 }
 
